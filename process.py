@@ -30,7 +30,7 @@ def extract_pieces_from_image(trained_model, image_path):
     kernel_cross = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
 
     img_rgb = load_image(image_path[2])
-    display_image(img_rgb)
+    # display_image(img_rgb)
     img_bin = image_bin(image_gray(img_rgb))
     h,s,v = split2hsv(img_rgb)
     hs_bin = image_bin_for_validation(h+s)
@@ -39,7 +39,7 @@ def extract_pieces_from_image(trained_model, image_path):
     # hs_bin = erode(hs_bin)
     # display_image(hs_bin)
     org_img, regions, coordinates = select_roi2(img_rgb, hs_bin_opening)
-    # display_image(org_img)
+    display_image(org_img)
     coordinates = determine_tiles(org_img, coordinates)
 
     test_inputs = prepare_for_ann(regions)
