@@ -12,4 +12,4 @@ pieces_test_paths = [os.path.join(TEST_DATASET_PATH, image) for image in os.list
 
 model = train_model(pieces_test_paths, SERIALIZATION_FOLDER_PATH)
 pieces_list = extract_pieces_from_image(model, pieces_train_paths)
-print(pieces_test_paths)
+#print(pieces_test_paths)

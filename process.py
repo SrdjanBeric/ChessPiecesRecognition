@@ -29,7 +29,8 @@ def train_model(train_image_paths, serialization_folder):
 def extract_pieces_from_image(trained_model, image_path):
     kernel_cross = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
 
-    img_rgb = load_image(image_path[1])
+    img_rgb = load_image(image_path[2])
+    # display_image(img_rgb)
     img_bin = image_bin(image_gray(img_rgb))
     h,s,v = split2hsv(img_rgb)
     hs_bin = image_bin_for_validation(h+s)
@@ -37,23 +38,19 @@ def extract_pieces_from_image(trained_model, image_path):
     # display_image(hs_bin_opening)
     # hs_bin = erode(hs_bin)
     # display_image(hs_bin)
-    org_img, regions = select_roi2(img_rgb, hs_bin_opening)
-    display_image(org_img)
-    # original_image = cv2.imread(image_path[2])
+    org_img, regions, coordinates = select_roi2(img_rgb, hs_bin_opening)
+    # display_image(org_img)
+    coordinates = determine_tiles(org_img, coordinates)
 
-    # two_colors = two_dominant_colors(original_image)
-    # remove_tiles(original_imageRGB, two_colors)
-
-    # test = invert(image_bin(image_gray(original_image)))
-    # test_bin = erode(dilate(test))
-    # selected_test, test_numbers = select_roi_test_image(original_image.copy(), test_bin)
-    # # display_image(test)
-    # display_image(regions[2])
     test_inputs = prepare_for_ann(regions)
     result = trained_model.predict(np.array(test_inputs, np.float32))
     # print(result)
     pieces = ['rook', 'knight', 'bishop', 'queen', 'king', 'pawn']
-    print(display_result(result, pieces))
-
+    pieces_results = display_result(result, pieces)
+    # print(pieces_results)
+    i = 0
+    while i < len(pieces_results):
+        print(pieces_results[i] + ' ' + coordinates[i][0] + coordinates[i][1])
+        i += 1
     # plt.imshow(original_image)
     plt.show()

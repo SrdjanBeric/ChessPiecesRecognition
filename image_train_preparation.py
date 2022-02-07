@@ -46,10 +46,9 @@ def select_roi2(image_orig, image_bin):
     img_height, img_width, img_channel = image_orig.shape
     tile_height = img_height/8
     tile_width = img_width/8
-    # contours.remove(contours[0])
-    # cv2.drawContours(image_orig, contours, -1, (255, 0, 0), 1)
-    # display_image(image_orig)
 
+    coordinates = []
+    pieces_list = []
     regions_list = []
     sorted_regions = []
     regions_array = []
@@ -60,38 +59,18 @@ def select_roi2(image_orig, image_bin):
             region_bin = image_bin[y:y + h + 1, x:x + w + 1]
             region = image_orig[y:y + h + 1, x:x + w + 1]
             # display_image(region_bin)
+            coordinates.append([x, y])
             final_region = remove_inner_contours(region, region_bin)
             regions_list.append(region_bin)
             regions_array.append([resize_region(region_bin), (x, y, w, h)])
             cv2.rectangle(image_orig, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-    # display_image(regions_list[0])
-    regions_array = sorted(regions_array, key=lambda item: item[1][0])
+    # display_image(regions_list[2])
+    # regions_array = sorted(regions_array, key=lambda item: item[1][0])
     sorted_regions = [region[0] for region in regions_array]
-    # display_image(sorted_regions[1])
-
-    return image_orig, sorted_regions
-
-
-# def select_roi_test_image(image_orig, image_bin):
-#     img, contours, hierarchy = cv2.findContours(image_bin.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-#     cv2.drawContours(image_orig, contours, -1, (255, 0, 0), 1)
-#     display_image(image_orig)
-#     sorted_regions = []
-#     regions_array = []
-#     for contour in contours:
-#         x, y, w, h = cv2.boundingRect(contour)
-#         area = cv2.contourArea(contour)
-#         if area > 100 and h < 90 and h > 50 and w > 20:
-#             region = image_bin[y:y + h + 1, x:x + w + 1]
-#             regions_array.append([resize_region(region), (x, y, w, h)])
-#             cv2.rectangle(image_orig, (x, y), (x + w, y + h), (0, 255, 0), 2)
-#
-#     # nije mi potrebno sortiranje po x osi, i vracaj x,y
-#     regions_array = sorted(regions_array, key=lambda item: item[1][0])
-#     sorted_regions = [region[0] for region in regions_array]
-#
-#     return image_orig, sorted_regions
+    # display_image(sorted_regions[2])
+    # print(coordinates)
+    return image_orig, sorted_regions, coordinates
 
 
 def matrix_to_vector(image):
@@ -189,7 +168,7 @@ def train_network(neural_network, x_train, y_train):
     sgd = SGD(lr=0.01, momentum=0.9)
     neural_network.compile(loss='mean_squared_error', optimizer=sgd)
 
-    neural_network.fit(x_train, y_train, epochs=20000, batch_size=1, verbose=1, shuffle=False)
+    neural_network.fit(x_train, y_train, epochs=40000, batch_size=1, verbose=1, shuffle=False)
     print("Network trained successfully!")
     return neural_network
 
@@ -223,3 +202,57 @@ def load_trained_model(serialization_folder):
     except Exception as e:
         print("Warning: No model found!")
         return None
+
+
+def determine_tiles(img, coordinates):
+    img_height, img_width, img_channel = img.shape
+    tile_length = img_height/8
+    tile_coordinates = []
+
+    i = 0
+    while i < len(coordinates):
+        coordinates[i][0] = round(coordinates[i][0]/tile_length) + 1
+        coordinates[i][1] = round(coordinates[i][1] / tile_length) + 1
+        i += 1
+
+    i = 0
+    while i < len(coordinates):
+        if (coordinates[i][0] == 1):
+            coordinates[i][0] = 'a'
+        if (coordinates[i][0] == 2):
+            coordinates[i][0] = 'b'
+        if (coordinates[i][0] == 3):
+            coordinates[i][0] = 'c'
+        if (coordinates[i][0] == 4):
+            coordinates[i][0] = 'd'
+        if (coordinates[i][0] == 5):
+            coordinates[i][0] = 'e'
+        if (coordinates[i][0] == 6):
+            coordinates[i][0] = 'f'
+        if (coordinates[i][0] == 7):
+            coordinates[i][0] = 'g'
+        if (coordinates[i][0] == 8):
+            coordinates[i][0] = 'h'
+        i += 1
+
+    i = 0
+    while i < len(coordinates):
+        if (coordinates[i][1] == 1):
+            coordinates[i][1] = '8'
+        if (coordinates[i][1] == 2):
+            coordinates[i][1] = '7'
+        if (coordinates[i][1] == 3):
+            coordinates[i][1] = '6'
+        if (coordinates[i][1] == 4):
+            coordinates[i][1] = '5'
+        if (coordinates[i][1] == 5):
+            coordinates[i][1] = '4'
+        if (coordinates[i][1] == 6):
+            coordinates[i][1] = '3'
+        if (coordinates[i][1] == 7):
+            coordinates[i][1] = '2'
+        if (coordinates[i][1] == 8):
+            coordinates[i][1] = '1'
+        i += 1
+
+    return coordinates
