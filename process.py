@@ -30,7 +30,7 @@ def extract_pieces_from_image(trained_model, image_path):
     kernel_cross = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
 
     img_rgb = load_image(image_path[2])
-    # display_image(img_rgb)
+    display_image(img_rgb)
     img_bin = image_bin(image_gray(img_rgb))
     h,s,v = split2hsv(img_rgb)
     hs_bin = image_bin_for_validation(h+s)

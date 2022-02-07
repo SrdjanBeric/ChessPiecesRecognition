@@ -10,7 +10,7 @@ from keras.optimizers import SGD
 
 def resize_region(region):
     '''Transformisati selektovani region na sliku dimenzija 28x28'''
-    return cv2.resize(region,(28,28), interpolation = cv2.INTER_NEAREST)
+    return cv2.resize(region,(50,50), interpolation = cv2.INTER_NEAREST)
 
 
 def select_roi(image_orig, image_bin):
@@ -37,12 +37,13 @@ def select_roi(image_orig, image_bin):
 
     regions_array = sorted(regions_array, key=lambda item: item[1][0])
     sorted_regions = [region[0] for region in regions_array]
-    # display_image(sorted_regions[0])
+    # display_image(sorted_regions[5])
     return image_orig, sorted_regions
 
 
 def select_roi2(image_orig, image_bin):
     img, contours, hierarchy = cv2.findContours(image_bin.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
     img_height, img_width, img_channel = image_orig.shape
     tile_height = img_height/8
     tile_width = img_width/8
@@ -62,7 +63,7 @@ def select_roi2(image_orig, image_bin):
             coordinates.append([x, y])
             final_region = remove_inner_contours(region, region_bin)
             regions_list.append(region_bin)
-            regions_array.append([resize_region(region_bin), (x, y, w, h)])
+            regions_array.append([resize_region(final_region), (x, y, w, h)])
             cv2.rectangle(image_orig, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
     # display_image(regions_list[2])
@@ -152,7 +153,7 @@ def create_network():
     print("Creating network...")
 
     neural_network = Sequential()
-    neural_network.add(Dense(128, input_dim=784, activation='sigmoid'))
+    neural_network.add(Dense(128, input_dim=2500, activation='sigmoid'))
     neural_network.add(Dense(6, activation='sigmoid'))
 
     print("Network created successfully!")
@@ -166,9 +167,9 @@ def train_network(neural_network, x_train, y_train):
     y_train = bb8.array(y_train, bb8.float32)
 
     sgd = SGD(lr=0.01, momentum=0.9)
-    neural_network.compile(loss='mean_squared_error', optimizer=sgd)
+    neural_network.compile(loss='categorical_crossentropy', optimizer=sgd)
 
-    neural_network.fit(x_train, y_train, epochs=40000, batch_size=1, verbose=1, shuffle=False)
+    neural_network.fit(x_train, y_train, epochs=20000, batch_size=1, verbose=1, shuffle=False)
     print("Network trained successfully!")
     return neural_network
 

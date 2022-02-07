@@ -64,8 +64,11 @@ def remove_outside_of_contour(img_bin):
 
 def remove_inner_contours(image_orig, image_binary):
     img, contours, hierarchy = cv2.findContours(image_binary.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
     contours.remove(contours[0])
+
+    cv2.drawContours(image_orig, contours, -1, (255, 0, 0), 1)
+
+    # display_image(image_orig)
 
     outter_contours = []
     for i in range(len(contours)):
@@ -73,9 +76,10 @@ def remove_inner_contours(image_orig, image_binary):
         if (hierarchy[0, i, 3] == -1):
             outter_contours.append(contours[i])
 
+
     cv2.drawContours(image_orig, outter_contours, -1, (0, 0, 0), thickness=cv2.FILLED)
     gray = image_gray(image_orig)
-    bin = image_bin(gray)
+    bin = image_bin_for_validation(gray)
     # display_image(bin)
     return bin
 
