@@ -63,12 +63,11 @@ def remove_outside_of_contour(img_bin):
 
 
 def remove_inner_contours(image_orig, image_binary):
+    image_original = image_orig.copy()
     img, contours, hierarchy = cv2.findContours(image_binary.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     contours.remove(contours[0])
 
     cv2.drawContours(image_orig, contours, -1, (255, 0, 0), 1)
-
-    # display_image(image_orig)
 
     outter_contours = []
     for i in range(len(contours)):
@@ -80,15 +79,30 @@ def remove_inner_contours(image_orig, image_binary):
     cv2.drawContours(image_orig, outter_contours, -1, (0, 0, 0), thickness=cv2.FILLED)
     gray = image_gray(image_orig)
     bin = image_bin_for_validation(gray)
-    # display_image(bin)
-    return bin
+    bin_not = cv2.bitwise_not(bin)
+    just_piece = cv2.bitwise_and(image_original,image_original, mask = bin_not)
+    # display_image(just_piece)
+    piece_color = determine_piece_color(just_piece)
+
+    return bin, piece_color
 
 
-def two_dominant_colors(img):
+def determine_piece_color(just_piece):
+    color = dominant_color(just_piece)
+    r = color[0][0]
+    g = color[0][1]
+    b = color[0][2]
+    if(r > 80 and g > 80 and b > 80):
+        return 'white'
+    else:
+        return 'black'
+
+
+def dominant_color(img):
     height, width, _ = np.shape(img)
     data = np.reshape(img, (height * width, 3))
     data = np.float32(data)
-    number_clusters = 2
+    number_clusters = 1
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
     flags = cv2.KMEANS_RANDOM_CENTERS
     compactness, labels, centers = cv2.kmeans(data, number_clusters, None, criteria, 10, flags)
@@ -100,6 +114,9 @@ def two_dominant_colors(img):
         bar, rgb = create_bar(200, 200, row)
         bars.append(bar)
         rgb_values.append(rgb)
+        # print(rgb)
+
+    # print(rgb_values)
 
     img_bar = np.hstack(bars)
 
@@ -107,13 +124,13 @@ def two_dominant_colors(img):
     for index, row in enumerate(rgb_values):
         image = cv2.putText(img_bar, f'{index + 1}. RGB: {row}', (5 + 200 * index, 200 - 10),
                             font, 0.5, (255, 0, 0), 1, cv2.LINE_AA)
-        print(f'{index + 1}. RGB{row}')
+        # print(f'{index + 1}. RGB{row}')
         two_colors.append(row)
 
-    print(two_colors)
+    # print(two_colors)
     # cv2.imshow('Image', img)
-    cv2.imshow('Dominant colors', img_bar)
-    cv2.waitKey(0)
+    # cv2.imshow('Dominant colors', img_bar)
+    # cv2.waitKey(0)
     return two_colors
 
 

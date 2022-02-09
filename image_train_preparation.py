@@ -16,7 +16,7 @@ def resize_region(region):
 def select_roi(image_orig, image_bin):
     img, contours, hierarchy = cv2.findContours(image_bin.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     # contours.remove(contours[0])
-    cv2.drawContours(image_orig, contours, -1, (255, 0, 0), 1)
+    # cv2.drawContours(image_orig, contours, -1, (255, 0, 0), 1)
     # display_image(image_orig)
 
     regions_list = []
@@ -28,7 +28,7 @@ def select_roi(image_orig, image_bin):
         if area > 100 and h < 130 and h > 100 and w > 20:
             region_bin = image_bin[y:y + h + 1, x:x + w + 1]
             region = image_orig[y:y + h + 1, x:x + w + 1]
-            final_region = remove_inner_contours(region, region_bin)
+            final_region, color = remove_inner_contours(region, region_bin)
             regions_list.append(final_region)
             regions_array.append([resize_region(final_region), (x, y, w, h)])
             cv2.rectangle(image_orig, (x, y), (x + w, y + h), (0, 255, 0), 2)
@@ -48,6 +48,7 @@ def select_roi2(image_orig, image_bin):
     tile_height = img_height/8
     tile_width = img_width/8
 
+    piece_colors = []
     coordinates = []
     pieces_list = []
     regions_list = []
@@ -61,17 +62,18 @@ def select_roi2(image_orig, image_bin):
             region = image_orig[y:y + h + 1, x:x + w + 1]
             # display_image(region_bin)
             coordinates.append([x, y])
-            final_region = remove_inner_contours(region, region_bin)
+            final_region, piece_color = remove_inner_contours(region, region_bin)
+            piece_colors.append(piece_color)
             regions_list.append(region_bin)
             regions_array.append([resize_region(final_region), (x, y, w, h)])
             cv2.rectangle(image_orig, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-    # display_image(regions_list[2])
+    # display_image(regions_list[7])
     # regions_array = sorted(regions_array, key=lambda item: item[1][0])
     sorted_regions = [region[0] for region in regions_array]
     # display_image(sorted_regions[2])
     # print(coordinates)
-    return image_orig, sorted_regions, coordinates
+    return image_orig, sorted_regions, coordinates, piece_colors
 
 
 def matrix_to_vector(image):
