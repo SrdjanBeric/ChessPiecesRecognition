@@ -29,7 +29,7 @@ def train_model(train_image_paths, serialization_folder):
 def extract_pieces_from_image(trained_model, image_path):
     kernel_cross = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
 
-    img_rgb = load_image(image_path[0])
+    img_rgb = load_image(image_path)
     display_image(img_rgb)
 
     img_bin = image_bin(image_gray(img_rgb))

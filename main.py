@@ -11,5 +11,9 @@ TEST_DATASET_PATH = '.'+os.path.sep+'dataset'+os.path.sep+'test'+os.path.sep
 pieces_test_paths = [os.path.join(TEST_DATASET_PATH, image) for image in os.listdir(TEST_DATASET_PATH)]
 
 model = train_model(pieces_test_paths, SERIALIZATION_FOLDER_PATH)
-pieces_list = extract_pieces_from_image(model, pieces_train_paths)
-#print(pieces_test_paths)
+#pieces_list = extract_pieces_from_image(model, pieces_train_paths)
+i = 1
+while(i < len(pieces_train_paths)):
+       pieces_list = extract_pieces_from_image(model, pieces_train_paths[i])
+       i+=1
+#print(len(pieces_train_paths))
